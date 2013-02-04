@@ -1,7 +1,5 @@
 package uk.co.thomasc.tmv.io;
 
-import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 
 import lombok.Getter;
@@ -35,16 +33,10 @@ public class Decoder {
 	private IVideoPicture picture;
 	private IAudioSamples samples;
 	
-	private int outWidth;
-	private int outHeight;
-	
 	@Getter private IRational frameRate;
 	@Getter private long totalFrames;
 	
 	public Decoder(String fileName, int outWidth, int outHeight) {
-		this.outWidth = outWidth;
-		this.outHeight = outHeight;
-		
 		container = IContainer.make();
 		container.open(fileName, IContainer.Type.READ, null);
 		
@@ -85,14 +77,7 @@ public class Decoder {
 						offset += videoStreamCoder.decodeVideo(picture, pkt, offset);
 						if (picture.isComplete()) {
 							BufferedImage img = converter.toImage(picture);
-							
-							BufferedImage after = new BufferedImage(outWidth, outHeight, BufferedImage.TYPE_INT_ARGB);
-							AffineTransform at = new AffineTransform();
-							at.scale((outWidth * 1d) / img.getWidth(), (outHeight * 1d) / img.getHeight());
-							AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_BICUBIC);
-							after = scaleOp.filter(img, after);
-							
-							return new VideoFrame(after, picture.getTimeStamp());
+							return new VideoFrame(img, picture.getTimeStamp());
 						}
 					} else if (pkt.getStreamIndex() == audioStreamId) {
 						offset += audioStreamCoder.decodeAudio(samples, pkt, offset);
