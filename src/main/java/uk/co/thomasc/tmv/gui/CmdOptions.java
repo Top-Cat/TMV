@@ -6,10 +6,13 @@ import com.beust.jcommander.Parameter;
 
 public class CmdOptions {
 	
-	@Parameter(names = {"-in", "-i"}, description = "File to read", required = true)
+	@Parameter(names = "-console", description = "Don't show a GUI")
+	@Getter private boolean console = false;
+	
+	@Parameter(names = {"-in", "-i"}, description = "File to read")
 	@Getter private String inFile;
 	
-	@Parameter(names = {"-out", "-o"}, description = "File to write", required = true)
+	@Parameter(names = {"-out", "-o"}, description = "File to write")
 	@Getter private String outFile;
 	
 	@Parameter(names = {"-bitrate", "-b"}, description = "Bitrate to write at")
@@ -17,5 +20,8 @@ public class CmdOptions {
 	
 	@Parameter(names = {"-size", "-s"}, description = "Size to scale output to (Format: WxH)")
 	@Getter private String size = "";
+	
+	@Parameter(names = {"-threads", "-t"}, description = "Number of worker threads to spawn")
+	@Getter private int threads = Runtime.getRuntime().availableProcessors();
 	
 }

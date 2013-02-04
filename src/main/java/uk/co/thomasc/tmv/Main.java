@@ -21,21 +21,26 @@ public class Main {
 	public static void main(String[] args) {
 		CmdOptions cmd = new CmdOptions();
 		new JCommander(cmd, args);
-		if (cmd.getSize().contains("x")) {
-			String[] size = cmd.getSize().split("x");
-			width = Integer.parseInt(size[0]);
-			height = Integer.parseInt(size[1]);
+		if (!cmd.isConsole()) {
+			
+		} else if (cmd.getInFile() != null && cmd.getOutFile() != null) {
+			if (cmd.getSize().contains("x")) {
+				String[] size = cmd.getSize().split("x");
+				width = Integer.parseInt(size[0]);
+				height = Integer.parseInt(size[1]);
+			}
+			new Main(cmd.getInFile(), cmd.getOutFile(), cmd.getBitrate(), cmd.getThreads());
+		} else {
+			throw new RuntimeException("Missing input or output filename");
 		}
-		new Main(cmd.getInFile(), cmd.getOutFile(), cmd.getBitrate());
 	}
 	
 	public static Queue<VideoFrame> toProcess = new ConcurrentLinkedQueue<VideoFrame>();
 	public static Queue<Frame> completed = new ConcurrentLinkedQueue<Frame>();
 	
-	public Main(String inFile, String outFile, int bitrate) {
+	public Main(String inFile, String outFile, int bitrate, int threads) {
 		Decoder dec = new Decoder(inFile, getWidth(), getHeight());
-		int processors = Runtime.getRuntime().availableProcessors();
-		for (int i = 0; i < processors; i++) {
+		for (int i = 0; i < threads; i++) {
 			Thread thread = new Worker();
 			thread.setName("Worker-" + i);
 			thread.start();
@@ -44,6 +49,7 @@ public class Main {
 		
 		Frame frame;
 		while ((frame = dec.readFrame()) != null) {
+			while (toProcess.size() > threads * 2);
 			if (frame instanceof VideoFrame) {
 				toProcess.add((VideoFrame) frame);
 			} else {
