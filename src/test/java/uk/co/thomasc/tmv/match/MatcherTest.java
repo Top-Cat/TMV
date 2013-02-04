@@ -140,7 +140,7 @@ public class MatcherTest {
 		raster.setPixels(0, 0, 8, 8, pixels);
 		image.setData(raster);
 		
-		Cell cell = slowMatcher.match(image);
+		Cell cell = slowMatcher.match(image.getRGB(0, 0, 8, 8, null, 0, 8));
 		Assert.assertEquals(correct, cell);
 	}
 	
@@ -153,7 +153,7 @@ public class MatcherTest {
 		raster.setPixels(0, 0, 8, 8, pixels);
 		image.setData(raster);
 		
-		Cell cell = new Fast().match(image);
+		Cell cell = new Fast().match(image.getRGB(0, 0, 8, 8, null, 0, 8));
 		Assert.assertEquals(correct, cell);
 	}
 	

@@ -40,7 +40,7 @@ public class Writer extends Thread {
 				}
 			}
 			try {
-				Thread.sleep(10);
+				Thread.sleep(5);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -49,6 +49,7 @@ public class Writer extends Thread {
 			String percent = String.format("%,.2f", (written * 100d) / totalFrames);
 			System.out.print(nowString + " (" + percent + "%) " + written + " frames rendered, " + Main.isWorking() + ", " + Main.toProcess.size() + " -> " + Main.completed.size() + "      \r");
 		}
+		System.out.println("");
 		
 		enc.close();
 	}

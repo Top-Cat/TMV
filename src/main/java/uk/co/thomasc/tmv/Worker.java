@@ -77,7 +77,7 @@ public class Worker extends Thread {
 			if ((frm = Main.toProcess.poll()) != null) {
 				for (int row = 0; row < Main.getVCells(); row++) {
 					for (int col = 0; col < Main.getHCells(); col++) {
-						BufferedImage cell = frm.getOriginalFrame().getSubimage(8 * col, 8 * row, 8, 8);
+						int[] cell = frm.getOriginalFrame().getSubimage(8 * col, 8 * row, 8, 8).getRGB(0, 0, 8, 8, null, 0, 8);
 						Matcher matcher = (getStdDev(cell) < threshold) ? fastMatcher : slowMatcher;
 						result[row * Main.getHCells() + col] = matcher.match(cell);
 					}
@@ -87,7 +87,7 @@ public class Worker extends Thread {
 			}
 			
 			try {
-				Thread.sleep(10);
+				Thread.sleep(1);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -116,7 +116,7 @@ public class Worker extends Thread {
 		return result;
 	}
 	
-	private double getStdDev(BufferedImage input) {
+	private double getStdDev(int[] input) {
 		long totalR = 0;
 		long totalG = 0;
 		long totalB = 0;
@@ -126,7 +126,7 @@ public class Worker extends Thread {
 
 		for (int x = 0; x < 8; x++) {
 			for (int y = 0; y < 8; y++) {
-				int col = input.getRGB(x, y);
+				int col = input[y * 8 + x];
 				
 				totalR += Color.getRed(col);
 				totalG += Color.getGreen(col);

@@ -1,7 +1,5 @@
 package uk.co.thomasc.tmv.match;
 
-import java.awt.image.BufferedImage;
-
 import uk.co.thomasc.tmv.image.Cell;
 
 public class Slow implements Matcher {
@@ -15,12 +13,11 @@ public class Slow implements Matcher {
 	}
 
 	@Override
-	public Cell match(BufferedImage cell) {
+	public Cell match(int[] cellColor) {
 		Cell result = new Cell(0, 0, 13);
 		
 		int diff[] = new int[2];
 		int min = Integer.MAX_VALUE;
-		int[] cellColor = cell.getRGB(0, 0, 8, 8, null, 0, 8);
 		byte[] mcommon = getMCommon(cellColor);
 		
 		for (int cha = 3; cha < 255; cha++) {
@@ -28,12 +25,12 @@ public class Slow implements Matcher {
 			
 			for (int x = 0; x < 8; x++) {
 				for (int y = 0; y < 8; y++) {
-					int index = chars[cha][x * 8 + y] ? 0 : 1;
-					int color = cellColor[x * 8 + y];
+					boolean index = chars[cha][y * 8 + x] ? false : true;
+					int color = cellColor[y * 8 + x];
 					
 					for (int i = 0; i < 2; i++) {
-						diff[i] += Math.abs(Color.getRed(color) - Color.getRed(colours[mcommon[index]])) + Math.abs(Color.getGreen(color) - Color.getGreen(colours[mcommon[index]])) + Math.abs(Color.getBlue(color) - Color.getBlue(colours[mcommon[index]])); //0 and 1
-						index = 1 - index;
+						diff[i] += Color.diff(color, colours[mcommon[index ? 1 : 0]]);
+						index = !index;
 					}
 				}
 			}
@@ -63,9 +60,8 @@ public class Slow implements Matcher {
 				minval = Integer.MAX_VALUE;
 				min = 0;
 				for (int colour = 0; colour < 16; colour++) {
-					int cell = input[x * 8 + y];
-					diff = Math.abs(Color.getRed(colours[colour]) - Color.getRed(cell)) + Math.abs(Color.getGreen(colours[colour]) - Color.getGreen(cell)) + Math.abs(Color.getBlue(colours[colour]) - Color.getBlue(cell));
-					if (diff < minval) {
+					int cell = input[y * 8 + x];
+					if ((diff = Color.diff(colours[colour], cell)) < minval) {
 						minval = diff;
 						min = colour;
 					}

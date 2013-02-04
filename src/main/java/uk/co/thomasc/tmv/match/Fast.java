@@ -1,7 +1,5 @@
 package uk.co.thomasc.tmv.match;
 
-import java.awt.Color;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -17,7 +15,7 @@ public class Fast implements Matcher {
 		try {
 			stream = Fast.class.getResourceAsStream("/Fcols.dat");
 			for (int i = 0; i < 136; i++) {
-				ColC col = new ColC(stream.read(), stream.read(), new Color(stream.read(), stream.read(), stream.read()));
+				ColC col = new ColC(stream.read(), stream.read(), Color.combine(stream.read(), stream.read(), stream.read()));
 				avgs[i] = col;
 			}
 			stream.close();
@@ -34,16 +32,15 @@ public class Fast implements Matcher {
 	}
 
 	@Override
-	public Cell match(BufferedImage cell) {
+	public Cell match(int[] cellColor) {
 		Cell result = new Cell(177, 0, 0);
 		
 		int diff = 0;
 		int min = Integer.MAX_VALUE;
-		Color avg = getAvgColour(cell);
+		int avg = getAvgColour(cellColor);
 		
 		for (int i = 0; i < 136; i++) {
-			diff = Math.abs(avgs[i].getAvg().getRed() - avg.getRed()) + Math.abs(avgs[i].getAvg().getGreen() - avg.getGreen()) + Math.abs(avgs[i].getAvg().getBlue() - avg.getBlue());
-			if (diff < min) {
+			if ((diff = Color.diff(avgs[i].getAvg(), avg)) < min) {
 				min = diff;
 				result.setFromAverage(avgs[i]);
 			}
@@ -52,24 +49,24 @@ public class Fast implements Matcher {
 		return result;
 	}
 	
-	private static Color getAvgColour(BufferedImage input) {
+	private static int getAvgColour(int[] input) {
 		int tRed = 0;
 		int tBlue = 0;
 		int tGreen = 0;
-		for (int x = 0; x < input.getWidth(); x++) {
-			for (int y = 0; y < input.getHeight(); y++) {
-				Color color = new Color(input.getRGB(x, y));
+		for (int x = 0; x < 8; x++) {
+			for (int y = 0; y < 8; y++) {
+				int color = input[y * 8 + x];
 				
-				tRed += color.getRed();
-				tGreen += color.getGreen();
-				tBlue += color.getBlue();
+				tRed += Color.getRed(color);
+				tGreen += Color.getGreen(color);
+				tBlue += Color.getBlue(color);
 			}
 		}
-		tRed = (int)(tRed / (input.getWidth() * input.getHeight()));
-		tGreen = (int)(tGreen / (input.getWidth() * input.getHeight()));
-		tBlue = (int)(tBlue / (input.getWidth() * input.getHeight()));
+		tRed = tRed / 64;
+		tGreen = tGreen / 64;
+		tBlue = tBlue / 64;
 		
-		return new Color(tRed, tGreen, tBlue);
+		return Color.combine(tRed, tGreen, tBlue);
 	}
 	
 }
