@@ -2,7 +2,7 @@ package uk.co.thomasc.tmv.image;
 
 import lombok.Getter;
 
-public class Frame {
+public abstract class Frame {
 	
 	@Getter private long timestamp;
 	
