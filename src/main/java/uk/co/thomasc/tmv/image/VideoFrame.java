@@ -24,7 +24,7 @@ public class VideoFrame extends Frame {
 			originalResizedFrame = new BufferedImage(Main.getWidth(), Main.getHeight(), BufferedImage.TYPE_INT_ARGB);
 			AffineTransform at = new AffineTransform();
 			at.scale((Main.getWidth() * 1d) / originalFrame.getWidth(), (Main.getHeight() * 1d) / originalFrame.getHeight());
-			AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+			AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_BICUBIC);
 			originalResizedFrame = scaleOp.filter(originalFrame, originalResizedFrame);
 			originalFrame = null;
 		}

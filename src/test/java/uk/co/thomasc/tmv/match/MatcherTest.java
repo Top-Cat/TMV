@@ -8,6 +8,7 @@ import java.io.InputStream;
 import org.junit.Assert;
 import org.junit.Test;
 
+import uk.co.thomasc.tmv.Worker;
 import uk.co.thomasc.tmv.image.Cell;
 
 public class MatcherTest {
@@ -100,6 +101,7 @@ public class MatcherTest {
 			168, 201, 242,
 			165, 201, 239
 	};
+	int[] pixelsArr;
 	
 	public MatcherTest() {
 		InputStream stream = null;
@@ -119,6 +121,13 @@ public class MatcherTest {
 				}
 			}
 			slowMatcher = new Slow(chars, colours);
+			
+			BufferedImage image = new BufferedImage(8, 8, BufferedImage.TYPE_INT_RGB);
+			WritableRaster raster = (WritableRaster) image.getData();
+			raster.setPixels(0, 0, 8, 8, pixels);
+			image.setData(raster);
+			
+			pixelsArr = image.getRGB(0, 0, 8, 8, null, 0, 8);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -135,12 +144,7 @@ public class MatcherTest {
 	public void slowTest() {
 		Cell correct = new Cell(32, 15, 7);
 		
-		BufferedImage image = new BufferedImage(8, 8, BufferedImage.TYPE_INT_RGB);
-		WritableRaster raster = (WritableRaster) image.getData();
-		raster.setPixels(0, 0, 8, 8, pixels);
-		image.setData(raster);
-		
-		Cell cell = slowMatcher.match(image.getRGB(0, 0, 8, 8, null, 0, 8));
+		Cell cell = slowMatcher.match(pixelsArr);
 		Assert.assertEquals(correct, cell);
 	}
 	
@@ -148,13 +152,65 @@ public class MatcherTest {
 	public void fastTest() {
 		Cell correct = new Cell(177, 13, 11);
 		
-		BufferedImage image = new BufferedImage(8, 8, BufferedImage.TYPE_INT_RGB);
-		WritableRaster raster = (WritableRaster) image.getData();
-		raster.setPixels(0, 0, 8, 8, pixels);
-		image.setData(raster);
-		
-		Cell cell = new Fast().match(image.getRGB(0, 0, 8, 8, null, 0, 8));
+		Cell cell = new Fast().match(pixelsArr);
 		Assert.assertEquals(correct, cell);
+	}
+	
+	@Test
+	public void stdDevTest() {
+		int iter = 30000000;
+		Worker wrk = new Worker();
+		long timeCur = System.currentTimeMillis();
+		double result1 = 0;
+		for (int i = 0; i < iter; i++) {
+			result1 = getStdOld(pixelsArr);
+		}
+		timeCur = System.currentTimeMillis() - timeCur;
+		
+		long timeNew = System.currentTimeMillis();
+		double result2 = 0;
+		for (int i = 0; i < iter; i++) {
+			result2 = wrk.getStdDev(pixelsArr);
+		}
+		timeNew = System.currentTimeMillis() - timeNew;
+		
+		System.out.println(timeCur);
+		System.out.println(timeNew);
+		Assert.assertTrue(timeNew < timeCur);
+		Assert.assertEquals(result1, result2, 5);
+	}
+	
+	public double getStdOld(int[] input) {
+		long totalR = 0;
+		long totalG = 0;
+		long totalB = 0;
+		long sigmaR2 = 0;
+		long sigmaG2 = 0;
+		long sigmaB2 = 0;
+
+		for (int x = 0; x < 8; x++) {
+			for (int y = 0; y < 8; y++) {
+				int col = input[y * 8 + x];
+				
+				totalR += Color.getRed(col);
+				totalG += Color.getGreen(col);
+				totalB += Color.getBlue(col);
+				
+				sigmaR2 += Color.getRed(col) * Color.getRed(col);
+				sigmaG2 += Color.getGreen(col) * Color.getGreen(col);
+				sigmaB2 += Color.getBlue(col) * Color.getBlue(col);
+			}
+		}
+		
+		double mRed = Math.pow(totalR / 64, 2);
+		double mGreen = Math.pow(totalG / 64, 2);
+		double mBlue = Math.pow(totalB / 64, 2);
+
+		double devRed = Math.sqrt((sigmaR2 - (64 * mRed)) / 63);
+		double devGreen = Math.sqrt((sigmaG2 - (64 * mGreen)) / 63);
+		double devBlue = Math.sqrt((sigmaB2 - (64 * mBlue)) / 63);
+
+		return (devRed + devGreen + devBlue);
 	}
 	
 }

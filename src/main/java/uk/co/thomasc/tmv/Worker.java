@@ -1,6 +1,5 @@
 package uk.co.thomasc.tmv;
 
-import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,7 +8,6 @@ import uk.co.thomasc.tmv.image.Cell;
 import uk.co.thomasc.tmv.image.VideoFrame;
 import uk.co.thomasc.tmv.match.Color;
 import uk.co.thomasc.tmv.match.Fast;
-import uk.co.thomasc.tmv.match.Matcher;
 import uk.co.thomasc.tmv.match.Slow;
 
 public class Worker extends Thread {
@@ -78,8 +76,7 @@ public class Worker extends Thread {
 				for (int row = 0; row < Main.getVCells(); row++) {
 					for (int col = 0; col < Main.getHCells(); col++) {
 						int[] cell = frm.getOriginalFrame().getSubimage(8 * col, 8 * row, 8, 8).getRGB(0, 0, 8, 8, null, 0, 8);
-						Matcher matcher = (getStdDev(cell) < threshold) ? fastMatcher : slowMatcher;
-						result[row * Main.getHCells() + col] = matcher.match(cell);
+						result[row * Main.getHCells() + col] = ((getStdDev(cell) < threshold) ? fastMatcher : slowMatcher).match(cell);
 					}
 				}
 				frm.setOutput(render());
@@ -97,26 +94,29 @@ public class Worker extends Thread {
 	public BufferedImage render() { //input length must be correct size or else. Renders into a bitmap based on the cell
 		BufferedImage output = new BufferedImage(Main.getWidth(), Main.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
 		
-		Graphics2D graphics = output.createGraphics();
+		//Graphics2D graphics = output.createGraphics();
 		for (int row = 0; row < Main.getVCells(); row++) { //scan top to bottom, left to right each time.
 			for (int col = 0; col < Main.getHCells(); col++) {
-				graphics.drawImage(getFBitmap(result[row * Main.getHCells() + col]), null, col * 8, row * 8);
+				output.setRGB(col * 8, row * 8, 8, 8, getFBitmap(result[row * Main.getHCells() + col]), 0, 8);
+				//graphics.drawImage(getFBitmap(result[row * Main.getHCells() + col]), null, col * 8, row * 8);
 			}
 		}
 		return output;
 	}
 	
-	private BufferedImage getFBitmap(Cell input) {
-		BufferedImage result = new BufferedImage(8, 8, BufferedImage.TYPE_3BYTE_BGR);
-		for (int row = 0; row <= 7; row++) {
+	private int[] getFBitmap(Cell input) {
+		//BufferedImage result = new BufferedImage(8, 8, BufferedImage.TYPE_3BYTE_BGR);
+		int[] result = new int[64];
+		for (int row = 0; row < 8; row++) {
 			for (int col = 0; col < 8; col++) {
-				result.setRGB(col, row, colours[chars[input.getCharacter()][col * 8 + row] ? input.getColour() : input.getColourB()]);
+				result[row * 8 + col] = colours[chars[input.getCharacter()][col * 8 + row] ? input.getColour() : input.getColourB()];
+				//result.setRGB(col, row, colours[chars[input.getCharacter()][col * 8 + row] ? input.getColour() : input.getColourB()]);
 			}
 		}
 		return result;
 	}
 	
-	private double getStdDev(int[] input) {
+	public double getStdDev(int[] input) {
 		long totalR = 0;
 		long totalG = 0;
 		long totalB = 0;
@@ -127,26 +127,26 @@ public class Worker extends Thread {
 		for (int x = 0; x < 8; x++) {
 			for (int y = 0; y < 8; y++) {
 				int col = input[y * 8 + x];
+				int r = Color.getRed(col);
+				int g = Color.getRed(col);
+				int b = Color.getRed(col);
 				
-				totalR += Color.getRed(col);
-				totalG += Color.getGreen(col);
-				totalB += Color.getBlue(col);
+				totalR += r;
+				totalG += g;
+				totalB += b;
 				
-				sigmaR2 += Color.getRed(col) * Color.getRed(col);
-				sigmaG2 += Color.getGreen(col) * Color.getGreen(col);
-				sigmaB2 += Color.getBlue(col) * Color.getBlue(col);
+				sigmaR2 += r * r;
+				sigmaG2 += g * g;
+				sigmaB2 += b * b;
 			}
 		}
 		
-		double mRed = Math.pow(totalR / 64, 2);
-		double mGreen = Math.pow(totalG / 64, 2);
-		double mBlue = Math.pow(totalB / 64, 2);
-
-		double devRed = Math.sqrt((sigmaR2 - (64 * mRed)) / 63);
-		double devGreen = Math.sqrt((sigmaG2 - (64 * mGreen)) / 63);
-		double devBlue = Math.sqrt((sigmaB2 - (64 * mBlue)) / 63);
-
-		return (devRed + devGreen + devBlue);
+		double mRed = (totalR * totalR) >> 6;
+		double mGreen = (totalG * totalG) >> 6;
+		double mBlue = (totalB * totalB) >> 6;
+		
+		// You could / 7.937253933 if you wanted to keep continuity
+		return (int) (Math.sqrt(sigmaR2 - mRed) + Math.sqrt(sigmaG2 - mGreen) + Math.sqrt(sigmaB2 - mBlue)) >> 3;
 	}
 	
 }
