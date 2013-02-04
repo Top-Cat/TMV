@@ -132,9 +132,9 @@ public class Worker extends Thread {
 				totalG += Color.getGreen(col);
 				totalB += Color.getBlue(col);
 				
-				sigmaR2 += Math.pow(Color.getRed(col), 2);
-				sigmaG2 += Math.pow(Color.getGreen(col), 2);
-				sigmaB2 += Math.pow(Color.getBlue(col), 2);
+				sigmaR2 += Color.getRed(col) * Color.getRed(col);
+				sigmaG2 += Color.getGreen(col) * Color.getGreen(col);
+				sigmaB2 += Color.getBlue(col) * Color.getBlue(col);
 			}
 		}
 		
