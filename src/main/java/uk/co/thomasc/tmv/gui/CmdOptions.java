@@ -12,6 +12,9 @@ public class CmdOptions {
 	@Parameter(names = {"-out", "-o"}, description = "File to write", required = true)
 	@Getter private String outFile;
 	
+	@Parameter(names = {"-bitrate", "-b"}, description = "Bitrate to write at")
+	@Getter private int bitrate = 10000;
+	
 	@Parameter(names = {"-size", "-s"}, description = "Size to scale output to (Format: WxH)")
 	@Getter private String size = "";
 	

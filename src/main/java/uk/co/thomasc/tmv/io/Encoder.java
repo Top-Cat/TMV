@@ -27,7 +27,7 @@ public class Encoder {
 	private IStreamCoder outAudioStreamCoder;
 	private IPacket packet;
 	
-	public Encoder(String fileName, int outWidth, int outHeight, IRational frameRate) {
+	public Encoder(String fileName, int outWidth, int outHeight, int bitrate, IRational frameRate) {
 		this.width = outWidth;
 		this.height = outHeight;
 		
@@ -43,7 +43,7 @@ public class Encoder {
 		outVideoStreamCoder = outStream.getStreamCoder();
 		
 		outVideoStreamCoder.setNumPicturesInGroupOfPictures(1);
-		outVideoStreamCoder.setBitRate(10000 * 1024);
+		outVideoStreamCoder.setBitRate(bitrate * 1024);
 		outVideoStreamCoder.setBitRateTolerance(200 * 1024);
 		outVideoStreamCoder.setPixelType(IPixelFormat.Type.YUV420P);
 		outVideoStreamCoder.setHeight(height);

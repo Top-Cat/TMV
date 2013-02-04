@@ -26,13 +26,13 @@ public class Main {
 			width = Integer.parseInt(size[0]);
 			height = Integer.parseInt(size[1]);
 		}
-		new Main(cmd.getInFile(), cmd.getOutFile());
+		new Main(cmd.getInFile(), cmd.getOutFile(), cmd.getBitrate());
 	}
 	
 	public static Queue<VideoFrame> toProcess = new ConcurrentLinkedQueue<VideoFrame>();
 	public static Queue<Frame> completed = new ConcurrentLinkedQueue<Frame>();
 	
-	public Main(String inFile, String outFile) {
+	public Main(String inFile, String outFile, int bitrate) {
 		Decoder dec = new Decoder(inFile, getWidth(), getHeight());
 		int processors = Runtime.getRuntime().availableProcessors();
 		for (int i = 0; i < processors; i++) {
@@ -40,7 +40,7 @@ public class Main {
 			thread.setName("Worker-" + i);
 			thread.start();
 		}
-		new Writer(outFile, dec.getFrameRate(), dec.getTotalFrames()).start();
+		new Writer(outFile, bitrate, dec.getFrameRate(), dec.getTotalFrames()).start();
 		
 		Frame frame;
 		while ((frame = dec.readFrame()) != null) {
