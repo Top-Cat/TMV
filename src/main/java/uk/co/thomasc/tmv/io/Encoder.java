@@ -27,7 +27,7 @@ public class Encoder {
 	private IStreamCoder outAudioStreamCoder;
 	private IPacket packet;
 	
-	public Encoder(String fileName, int outWidth, int outHeight, int bitrate, IRational frameRate) {
+	public Encoder(String fileName, int outWidth, int outHeight, int bitrate, int samplerate, IRational frameRate) {
 		this.width = outWidth;
 		this.height = outHeight;
 		
@@ -60,7 +60,7 @@ public class Encoder {
 		
 		outAudioStreamCoder.setFlag(IStreamCoder.Flags.FLAG_QSCALE, false);
 		outAudioStreamCoder.setBitRate(32000);
-		outAudioStreamCoder.setSampleRate(44100);
+		outAudioStreamCoder.setSampleRate(samplerate);
 		outAudioStreamCoder.setChannels(2);
 		//outAudioStreamCoder.setProperty("frame_size", 1024);
 		//outAudioStreamCoder.setProperty("strict", -2);

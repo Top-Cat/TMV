@@ -16,18 +16,20 @@ public class Writer extends Thread {
 	private IRational frameRate;
 	private long totalFrames;
 	private int bitrate;
+	private int samplerate;
 	
-	public Writer(String outFile, int bitrate, IRational frameRate, long totalFrames) {
+	public Writer(String outFile, int bitrate, IRational frameRate, long totalFrames, int samplerate) {
 		setName("Writer");
 		this.frameRate = frameRate;
 		this.totalFrames = totalFrames;
 		this.outFile = outFile;
 		this.bitrate = bitrate;
+		this.samplerate = samplerate;
 	}
 	
 	@Override
 	public void run() {
-		Encoder enc = new Encoder(outFile, Main.getWidth(), Main.getHeight(), bitrate, frameRate);
+		Encoder enc = new Encoder(outFile, Main.getWidth(), Main.getHeight(), bitrate, samplerate, frameRate);
 		Frame frm;
 		
 		while (Main.isWorking() || Main.completed.size() > 0 || Main.toProcess.size() > 0) {

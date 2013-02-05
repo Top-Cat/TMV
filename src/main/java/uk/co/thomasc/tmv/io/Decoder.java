@@ -35,6 +35,7 @@ public class Decoder {
 	
 	@Getter private IRational frameRate;
 	@Getter private long totalFrames;
+	@Getter private int samplerate;
 	
 	public Decoder(String fileName, int outWidth, int outHeight) {
 		container = IContainer.make();
@@ -62,6 +63,7 @@ public class Decoder {
 		
 		frameRate = videoStreamCoder.getFrameRate();
 		totalFrames = ((container.getDuration() * frameRate.getNumerator()) / frameRate.getDenominator()) / (1000 * 1000);
+		samplerate = audioStreamCoder.getSampleRate();
 		
 		pkt = IPacket.make();
 		offset = pkt.getSize();

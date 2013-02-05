@@ -45,7 +45,7 @@ public class Main {
 			thread.setName("Worker-" + i);
 			thread.start();
 		}
-		new Writer(outFile, bitrate, dec.getFrameRate(), dec.getTotalFrames()).start();
+		new Writer(outFile, bitrate, dec.getFrameRate(), dec.getTotalFrames(), dec.getSamplerate()).start();
 		
 		Frame frame;
 		while ((frame = dec.readFrame()) != null) {
