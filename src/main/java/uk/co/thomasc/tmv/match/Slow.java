@@ -21,27 +21,22 @@ public class Slow implements Matcher {
 		byte[] mcommon = getMCommon(cellColor);
 		
 		for (int cha = 3; cha < 255; cha++) {
-			diff = new int[] {0, 0};
-			
-			for (int x = 0; x < 8; x++) {
-				for (int y = 0; y < 8; y++) {
-					boolean index = chars[cha][y * 8 + x] ? false : true;
-					int color = cellColor[y * 8 + x];
-					
-					for (int i = 0; i < 2; i++) {
-						diff[i] += Color.diff(color, colours[mcommon[index ? 1 : 0]]);
-						index = !index;
-					}
+			for (int pix = 0; pix < 64; pix++) {
+				boolean index = chars[cha][pix] ? false : true;
+				int color = cellColor[pix];
+				
+				for (int i = 0; i < 2; i++) {
+					diff[i] += Color.diff(color, colours[mcommon[index ? 1 : 0]]);
+					index = !index;
 				}
 			}
 			
-			int index = 0;
 			for (int i = 0; i < 2; i++) {
 				if (diff[i] < min) {
 					min = diff[i];
-					result.setValues(cha, mcommon[index], mcommon[1 - index]);
+					result.setValues(cha, mcommon[i], mcommon[1 - i]);
 				}
-				index = 1;
+				diff[i] = 0;
 			}
 		}
 		
@@ -57,10 +52,10 @@ public class Slow implements Matcher {
 
 		for (int x = 0; x < 8; x++) {
 			for (int y = 0; y < 8; y++) {
+				int cell = input[y * 8 + x];
 				minval = Integer.MAX_VALUE;
 				min = 0;
 				for (int colour = 0; colour < 16; colour++) {
-					int cell = input[y * 8 + x];
 					if ((diff = Color.diff(colours[colour], cell)) < minval) {
 						minval = diff;
 						min = colour;
