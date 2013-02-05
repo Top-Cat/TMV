@@ -48,10 +48,10 @@ public class Worker extends Thread {
 				for (int row = 0; row < 8; row++) {
 					temp = (byte) stream.read();
 					for (int c = 7; c >= 0; c--) {
-						var = (byte) (1 << c);
+						var = (byte) (1 << (byte) c);
 						var = (byte) (var & temp);
 						
-						chars[i][(7 - c) * 8 + row] = var > 0; //7-c reverses endian.
+						chars[i][row * 8 + (7 - c)] = var != 0; //7-c reverses endian.
 					}
 				}
 			}
@@ -109,7 +109,7 @@ public class Worker extends Thread {
 		int[] result = new int[64];
 		for (int row = 0; row < 8; row++) {
 			for (int col = 0; col < 8; col++) {
-				result[row * 8 + col] = colours[chars[input.getCharacter()][col * 8 + row] ? input.getColour() : input.getColourB()];
+				result[row * 8 + col] = colours[chars[input.getCharacter()][row * 8 + col] ? input.getColour() : input.getColourB()];
 				//result.setRGB(col, row, colours[chars[input.getCharacter()][col * 8 + row] ? input.getColour() : input.getColourB()]);
 			}
 		}
